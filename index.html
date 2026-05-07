@@ -8,7 +8,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Kanit:wght@400;600;700&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+
+<!-- Windy API – สมัครรับ API Key ฟรีที่ https://api.windy.com/keys แล้วแทนที่ WINDY_KEY ด้านล่าง -->
+<script src="https://api.windy.com/api/loader/v1?key=YOUR_WINDY_API_KEY"></script>
 
 <style>
   :root {
@@ -70,15 +72,11 @@
     font-size: 1rem;
     flex-shrink: 0;
   }
-  .panel-header h2 {
-    font-family: 'Kanit', sans-serif;
-    font-size: 1rem;
-    color: var(--text-dark);
-    margin: 0;
-  }
-  .panel-header p { font-size: 0.78rem; color: var(--text-soft); margin: 0; }
+  .panel-header h2 { font-family:'Kanit',sans-serif; font-size:1rem; color:var(--text-dark); margin:0; }
+  .panel-header p  { font-size:0.78rem; color:var(--text-soft); margin:0; }
 
-  #map { height: 560px; width: 100%; }
+  #map-container { position: relative; }
+  #windy { height: 560px; width: 100%; }
 
   .district-legend {
     padding: 12px 16px;
@@ -111,18 +109,9 @@
     color: #fff;
     padding: 16px 20px;
   }
-  .station-header h3 {
-    font-family: 'Kanit', sans-serif;
-    font-size: 1rem;
-    margin: 0 0 4px 0;
-  }
+  .station-header h3 { font-family:'Kanit',sans-serif; font-size:1rem; margin:0 0 4px 0; }
   .station-name { font-size: 0.82rem; opacity: 0.85; }
-  .station-nav {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-top: 10px;
-  }
+  .station-nav { display:flex; align-items:center; gap:8px; margin-top:10px; }
   .station-nav button {
     background: rgba(255,255,255,0.2);
     border: 1px solid rgba(255,255,255,0.3);
@@ -154,14 +143,7 @@
   }
   .station-nav select option { background: var(--blue-dark); color: #fff; }
 
-  .update-time {
-    font-size: 0.72rem;
-    opacity: 0.8;
-    margin-top: 6px;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-  }
+  .update-time { font-size:0.72rem; opacity:0.8; margin-top:6px; display:flex; align-items:center; gap:4px; }
   .update-dot {
     width: 10px; height: 10px;
     border-radius: 50%;
@@ -172,12 +154,7 @@
   @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
 
   /* Weather Grid */
-  .weather-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    padding: 16px;
-  }
+  .weather-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; padding:16px; }
   .weather-card {
     background: var(--bg);
     border: 1px solid var(--border);
@@ -190,11 +167,7 @@
   }
   .weather-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-sm); }
   .weather-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 3px;
-    border-radius: 10px 10px 0 0;
+    content:''; position:absolute; top:0; left:0; right:0; height:3px; border-radius:10px 10px 0 0;
   }
   .weather-card.temp::before     { background: linear-gradient(90deg,#e53e3e,#dd6b20); }
   .weather-card.humidity::before { background: linear-gradient(90deg,#3182ce,#2b6cb0); }
@@ -203,25 +176,12 @@
   .weather-card.rain::before     { background: linear-gradient(90deg,#4299e1,#2b6cb0); }
   .weather-card.pm25::before     { background: linear-gradient(90deg,#9f7aea,#6b46c1); }
 
-  .wc-icon  { font-size: 1.4rem; margin-bottom: 6px; }
-  .wc-value {
-    font-family: 'Kanit', sans-serif;
-    font-size: 1.5rem;
-    font-weight: 700;
-    line-height: 1;
-    color: var(--text-dark);
-  }
-  .wc-unit  { font-size: 0.7rem; color: var(--text-soft); margin-left: 2px; }
-  .wc-label { font-size: 0.72rem; color: var(--text-soft); margin-top: 4px; }
+  .wc-icon  { font-size:1.4rem; margin-bottom:6px; }
+  .wc-value { font-family:'Kanit',sans-serif; font-size:1.5rem; font-weight:700; line-height:1; color:var(--text-dark); }
+  .wc-unit  { font-size:0.7rem; color:var(--text-soft); margin-left:2px; }
+  .wc-label { font-size:0.72rem; color:var(--text-soft); margin-top:4px; }
 
-  .pm25-badge {
-    display: inline-block;
-    font-size: 0.65rem;
-    padding: 2px 8px;
-    border-radius: 10px;
-    margin-top: 4px;
-    font-weight: 600;
-  }
+  .pm25-badge { display:inline-block; font-size:0.65rem; padding:2px 8px; border-radius:10px; margin-top:4px; font-weight:600; }
   .pm-vgood { background:#c6f6d5; color:#276749; }
   .pm-good  { background:#bee3f8; color:#2b6cb0; }
   .pm-mod   { background:#fefcbf; color:#975a16; }
@@ -229,73 +189,116 @@
   .pm-bad   { background:#9b2c2c; color:#fff; }
 
   /* Info panels */
-  .info-panel {
-    background: var(--surface);
-    border-radius: 16px;
-    box-shadow: var(--shadow-sm);
-    border: 1px solid var(--border);
-    padding: 16px;
-  }
-  .info-panel h3 {
-    font-family: 'Kanit', sans-serif;
-    font-size: 0.9rem;
-    color: var(--text-mid);
-    margin: 0 0 12px 0;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .tambon-info { font-size: 0.82rem; color: #3a5a7a; line-height: 1.8; }
-  .tambon-color-dot { width: 14px; height: 14px; border-radius: 3px; flex-shrink: 0; }
+  .info-panel { background:var(--surface); border-radius:16px; box-shadow:var(--shadow-sm); border:1px solid var(--border); padding:16px; }
+  .info-panel h3 { font-family:'Kanit',sans-serif; font-size:0.9rem; color:var(--text-mid); margin:0 0 12px 0; display:flex; align-items:center; gap:8px; }
+  .tambon-info { font-size:0.82rem; color:#3a5a7a; line-height:1.8; }
+  .tambon-color-dot { width:14px; height:14px; border-radius:3px; flex-shrink:0; }
 
-  /* Loading / Error */
-  .loading-state {
-    display: flex; flex-direction: column; align-items: center;
-    justify-content: center; padding: 32px; gap: 12px; color: var(--text-soft);
-  }
-  .spinner {
-    width: 32px; height: 32px;
-    border: 3px solid var(--border);
-    border-top-color: var(--blue);
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-  }
+  .loading-state { display:flex; flex-direction:column; align-items:center; justify-content:center; padding:32px; gap:12px; color:var(--text-soft); }
+  .spinner { width:32px; height:32px; border:3px solid var(--border); border-top-color:var(--blue); border-radius:50%; animation:spin 0.8s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  .error-state {
-    padding: 16px; background: #fff5f5; border: 1px solid #fed7d7;
-    border-radius: 8px; font-size: 0.82rem; color: #c53030; text-align: center;
-  }
+  .error-state { padding:16px; background:#fff5f5; border:1px solid #fed7d7; border-radius:8px; font-size:0.82rem; color:#c53030; text-align:center; }
 
   /* Popup */
-  .leaflet-popup-content-wrapper {
-    border-radius: 10px;
-    box-shadow: var(--shadow-md);
-    font-family: 'Sarabun', sans-serif;
-    font-size: 0.85rem;
-  }
-  .leaflet-popup-content { margin: 12px 16px; min-width: 140px; }
-  .popup-title { font-family: 'Kanit', sans-serif; font-weight: 600; color: var(--blue-dark); margin-bottom: 2px; }
-  .popup-sub   { color: var(--text-soft); font-size: 0.78rem; }
-  .popup-btn {
-    display: inline-block; margin-top: 8px;
-    background: var(--blue); color: #fff; border: none;
-    padding: 5px 12px; border-radius: 6px; font-size: 0.78rem;
-    cursor: pointer; font-family: 'Sarabun', sans-serif;
-  }
+  .leaflet-popup-content-wrapper { border-radius:10px; box-shadow:var(--shadow-md); font-family:'Sarabun',sans-serif; font-size:0.85rem; }
+  .leaflet-popup-content { margin:12px 16px; min-width:140px; }
+  .popup-title { font-family:'Kanit',sans-serif; font-weight:600; color:var(--blue-dark); margin-bottom:2px; }
+  .popup-sub   { color:var(--text-soft); font-size:0.78rem; }
+  .popup-btn   { display:inline-block; margin-top:8px; background:var(--blue); color:#fff; border:none; padding:5px 12px; border-radius:6px; font-size:0.78rem; cursor:pointer; font-family:'Sarabun',sans-serif; }
 
-  /* Scrollbar */
-  ::-webkit-scrollbar { width: 6px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar { width:6px; }
+  ::-webkit-scrollbar-track { background:transparent; }
+  ::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
+
+  /* ─── MAP CONTROLS TOOLBAR ─── */
+  .map-controls {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 900;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    pointer-events: all;
+  }
+  .map-ctrl-btn {
+    width: 36px; height: 36px;
+    background: #fff;
+    border: 1px solid rgba(0,0,0,0.12);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+    font-size: 1rem;
+    color: #444;
+    transition: all 0.15s;
+    line-height: 1;
+  }
+  .map-ctrl-btn:hover { background: #f5f8fc; box-shadow: 0 3px 10px rgba(0,0,0,0.18); }
+  .map-ctrl-btn.active { background: #4682B4; color: #fff; border-color: #4682B4; }
+  .map-ctrl-btn.zoom { font-size: 1.3rem; font-weight: 700; }
+  .ctrl-sep { height: 6px; }
+
+  /* ─── TOOLS PANEL ─── */
+  .tools-panel {
+    position: absolute;
+    right: 54px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 950;
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 6px 28px rgba(0,0,0,0.18);
+    width: 250px;
+    display: none;
+    overflow: hidden;
+    font-family: 'Sarabun', sans-serif;
+    max-height: 500px;
+    overflow-y: auto;
+  }
+  .tools-header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 14px 16px 10px;
+    border-bottom: 1px solid #f0f4f8;
+    position: sticky; top: 0; background: #fff; z-index: 1;
+  }
+  .tools-header h3 { font-family:'Kanit',sans-serif; font-size:1rem; color:#1a2e3d; margin:0; }
+  .tools-header button { background:none; border:none; cursor:pointer; font-size:1.1rem; color:#888; line-height:1; }
+  .tools-section { padding:10px 16px; border-bottom:1px solid #f0f4f8; }
+  .tools-section:last-child { border-bottom:none; }
+  .tools-section-title { font-size:0.72rem; color:#5a7a9a; font-weight:700; margin-bottom:8px; display:flex; align-items:center; gap:5px; letter-spacing:0.3px; }
+  .tools-row { display:flex; align-items:center; gap:8px; padding:5px 0; font-size:0.85rem; color:#1a2e3d; cursor:pointer; }
+  .tools-row input[type="radio"] { accent-color:#4682B4; width:15px; height:15px; flex-shrink:0; cursor:pointer; }
+  .tools-row label { flex:1; cursor:pointer; }
+  .tools-row .info-i { color:#b0c4d8; font-size:0.78rem; }
+
+  /* ─── ACTIVE LAYER BADGE ─── */
+  #active-layer-badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 800;
+    background: rgba(70,130,180,0.88);
+    color: #fff;
+    font-family: 'Sarabun', sans-serif;
+    font-size: 0.8rem;
+    padding: 5px 12px;
+    border-radius: 16px;
+    backdrop-filter: blur(4px);
+    pointer-events: none;
+  }
 
   @media (max-width: 900px) {
     .main-layout { grid-template-columns: 1fr; }
-    #map { height: 420px; }
+    #windy { height: 420px; }
+    .tools-panel { right: 50px; width: 220px; }
   }
 </style>
 </head>
 <body>
+
 <div class="main-layout">
 
   <!-- MAP PANEL -->
@@ -307,7 +310,50 @@
         <p>คลิกที่ตำบลเพื่อดูข้อมูลสถานีตรวจวัดอากาศ</p>
       </div>
     </div>
-    <div id="map"></div>
+
+    <div id="map-container">
+      <!-- Windy API renders into this div; GeoJSON + markers are added on top -->
+      <div id="windy"></div>
+
+      <!-- Current weather layer badge -->
+      <div id="active-layer-badge">🌬️ กระแสลม (Wind)</div>
+
+      <!-- Custom map controls toolbar -->
+      <div class="map-controls">
+        <button class="map-ctrl-btn" id="btn-location" title="ตำแหน่งของฉัน">📍</button>
+        <div class="ctrl-sep"></div>
+        <button class="map-ctrl-btn zoom" id="btn-zoom-in"  title="ซูมเข้า">+</button>
+        <button class="map-ctrl-btn zoom" id="btn-zoom-out" title="ซูมออก">−</button>
+        <div class="ctrl-sep"></div>
+        <button class="map-ctrl-btn" id="btn-tools" title="ชั้นข้อมูลสภาวะอากาศ">🌤️</button>
+      </div>
+
+      <!-- Tools / Layers panel -->
+      <div class="tools-panel" id="tools-panel">
+        <div class="tools-header">
+          <h3>ชั้นข้อมูลอากาศ</h3>
+          <button onclick="closeTools()">✕</button>
+        </div>
+
+        <!-- Windy weather layers — one always active -->
+        <div class="tools-section">
+          <div class="tools-section-title">◈ สภาวะอากาศ (Windy)</div>
+          <div class="tools-row">
+            <input type="radio" name="weather-layer" id="w-wind" value="wind" checked>
+            <label for="w-wind">🌬️ กระแสลม (Wind)</label>
+          </div>
+          <div class="tools-row">
+            <input type="radio" name="weather-layer" id="w-rain" value="rain">
+            <label for="w-rain">🌧️ ปริมาณน้ำฝน (Rain)</label>
+          </div>
+          <div class="tools-row">
+            <input type="radio" name="weather-layer" id="w-temp" value="temp">
+            <label for="w-temp">🌡️ อุณหภูมิ (Temperature)</label>
+          </div>
+        </div>
+      </div>
+    </div><!-- /map-container -->
+
     <div class="district-legend" id="district-legend"></div>
   </div>
 
@@ -358,11 +404,13 @@
 
 <script>
 // ─── CONFIG ───────────────────────────────────────────────────────────────────
-const BASE_URL = 'https://iwasam.eng.kps.ku.ac.th';
+const BASE_URL  = 'https://iwasam.eng.kps.ku.ac.th';
+const WINDY_KEY = 'RNf4X9q9kzk81OryGaBzrHxBbfo9BUeU'; // ← แทนที่ด้วย key จาก https://api.windy.com/keys (สมัครฟรี)
 
-// Kamphaeng Phet bounding box filter
+// Kamphaeng Phet province bounding box
 const KPP_BOUNDS = { minLat: 15.5, maxLat: 16.8, minLon: 98.7, maxLon: 100.5 };
 
+// ครบทั้ง 11 อำเภอ จ.กำแพงเพชร
 const DISTRICT_COLORS = {
   'เมืองกำแพงเพชร': { fill: '#276749', stroke: '#1a4731' },
   'โกสัมพีนคร':     { fill: '#2c7a7b', stroke: '#1d5c5c' },
@@ -377,10 +425,17 @@ const DISTRICT_COLORS = {
   'บึงสามัคคี':      { fill: '#7b3fbe', stroke: '#5a2d8a' },
 };
 
+const LAYER_LABELS = {
+  wind: '🌬️ กระแสลม (Wind)',
+  rain: '🌧️ ปริมาณน้ำฝน (Rain)',
+  temp: '🌡️ อุณหภูมิ (Temperature)',
+};
+
 // ─── STATE ────────────────────────────────────────────────────────────────────
-let map;
-let allStations    = [];   // สถานีทั้งหมดใน กพ.
-let activeStations = [];   // สถานีที่ filter ตามตำบล
+let map;           // Leaflet map instance (from Windy API)
+let windyStore;    // Windy store — used to switch overlays
+let allStations    = [];
+let activeStations = [];
 let currentIdx     = 0;
 let selectedLayer  = null;
 let geojsonLayer   = null;
@@ -394,7 +449,6 @@ async function fetchStations() {
     if (!r.ok) return null;
     const json = await r.json();
     const arr  = Array.isArray(json) ? json : (json.data || json.stations || []);
-    // กรองเฉพาะ กำแพงเพชร
     return arr.filter(s => {
       const lat = s.lat ?? s.latitude;
       const lon = s.lon ?? s.longitude ?? s.lng;
@@ -500,12 +554,11 @@ async function loadStationWeather(station) {
   if (!station) return;
   const code     = station.station_code ?? station.code ?? station.id;
   const name     = station.station_name ?? station.name ?? code;
-  const isOnline = station.online !== false; // ถือว่า online ถ้าไม่มีฟิลด์
+  const isOnline = station.online !== false;
   const dotColor = isOnline ? '#86efac' : '#e53e3e';
 
   document.getElementById('current-station-name').textContent = name;
 
-  // ใช้ latest_data จาก API โดยตรง; fetch เพิ่มเติมเฉพาะถ้าข้อมูลยังไม่มี
   let data = station.latest_data ?? null;
   if (!data) {
     document.getElementById('weather-content').innerHTML =
@@ -521,10 +574,12 @@ async function loadStationWeather(station) {
     const fmt = new Date(ts).toLocaleString('th-TH', {
       year:'numeric', month:'short', day:'numeric', hour:'2-digit', minute:'2-digit'
     });
-    const offlineTag = isOnline ? '' : ' · <span style="color:#fca5a5;font-weight:600;">ออฟไลน์</span>';
-    timeEl.innerHTML = `<div class="update-dot" style="background:${dotColor}"></div><span>อัปเดต: ${fmt}${offlineTag}</span>`;
+    const offTag = isOnline ? '' : ' · <span style="color:#fca5a5;font-weight:600;">ออฟไลน์</span>';
+    timeEl.innerHTML = `<div class="update-dot" style="background:${dotColor}"></div><span>อัปเดต: ${fmt}${offTag}</span>`;
   } else {
-    const label = isOnline ? `ตรวจวัดล่าสุด: ${new Date().toLocaleString('th-TH',{hour:'2-digit',minute:'2-digit'})}` : 'สถานีออฟไลน์';
+    const label = isOnline
+      ? `ตรวจวัดล่าสุด: ${new Date().toLocaleString('th-TH',{hour:'2-digit',minute:'2-digit'})}`
+      : 'สถานีออฟไลน์';
     timeEl.innerHTML = `<div class="update-dot" style="background:${dotColor}"></div><span>${label}</span>`;
   }
 }
@@ -547,10 +602,8 @@ function populateSelector(stations) {
     opt.textContent = s.station_name ?? s.name ?? `สถานี ${s.station_code}`;
     sel.appendChild(opt);
   });
-  const prevBtn = document.getElementById('prev-station');
-  const nextBtn = document.getElementById('next-station');
-  prevBtn.disabled = stations.length <= 1;
-  nextBtn.disabled = stations.length <= 1;
+  document.getElementById('prev-station').disabled = stations.length <= 1;
+  document.getElementById('next-station').disabled = stations.length <= 1;
 }
 
 function setActiveStations(stations, selectIdx = 0) {
@@ -561,18 +614,69 @@ function setActiveStations(stations, selectIdx = 0) {
   loadStationWeather(stations[currentIdx]);
 }
 
-// ─── MAP ──────────────────────────────────────────────────────────────────────
-function initMap() {
-  map = L.map('map', { center: [16.3, 99.5], zoom: 9, zoomControl: true });
-
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-    attribution: '© OpenStreetMap contributors © CARTO',
-    subdomains: 'abcd', maxZoom: 18,
-  }).addTo(map);
+// ─── WINDY WEATHER LAYER SWITCH ───────────────────────────────────────────────
+function setWeatherLayer(type) {
+  if (!windyStore) return;
+  windyStore.set('overlay', type);
+  document.getElementById('active-layer-badge').textContent = LAYER_LABELS[type] ?? type;
 }
 
+// ─── TOOLS PANEL ─────────────────────────────────────────────────────────────
+function closeTools() {
+  document.getElementById('tools-panel').style.display = 'none';
+  document.getElementById('btn-tools').classList.remove('active');
+}
+
+// ─── MAP CONTROLS SETUP ───────────────────────────────────────────────────────
+function setupControls() {
+  // Location
+  document.getElementById('btn-location').addEventListener('click', () => {
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(pos => {
+      const { latitude: lat, longitude: lon } = pos.coords;
+      map.setView([lat, lon], 14);
+      L.marker([lat, lon], {
+        icon: L.divIcon({
+          html: '<div style="background:#4682B4;border:3px solid #fff;border-radius:50%;width:14px;height:14px;box-shadow:0 2px 8px rgba(0,0,0,0.4);"></div>',
+          className: '', iconSize: [14,14], iconAnchor: [7,7]
+        })
+      }).addTo(map).bindPopup('📍 ตำแหน่งของคุณ').openPopup();
+    }, () => alert('ไม่สามารถระบุตำแหน่งได้ — กรุณาอนุญาต GPS'));
+  });
+
+  // Zoom
+  document.getElementById('btn-zoom-in').addEventListener('click',  () => map.zoomIn());
+  document.getElementById('btn-zoom-out').addEventListener('click', () => map.zoomOut());
+
+  // Tools panel toggle
+  document.getElementById('btn-tools').addEventListener('click', () => {
+    const panel = document.getElementById('tools-panel');
+    const btn   = document.getElementById('btn-tools');
+    const open  = panel.style.display === 'block';
+    panel.style.display = open ? 'none' : 'block';
+    btn.classList.toggle('active', !open);
+  });
+
+  // Weather layer radio buttons
+  document.querySelectorAll('input[name="weather-layer"]').forEach(radio => {
+    radio.addEventListener('change', e => {
+      if (e.target.checked) setWeatherLayer(e.target.value);
+    });
+  });
+
+  // Close tools when clicking outside
+  document.addEventListener('click', e => {
+    const panel = document.getElementById('tools-panel');
+    const btn   = document.getElementById('btn-tools');
+    if (panel.style.display === 'block' && !panel.contains(e.target) && !btn.contains(e.target)) {
+      closeTools();
+    }
+  });
+}
+
+// ─── GeoJSON ──────────────────────────────────────────────────────────────────
 function getDistrictColor(props) {
-  const name = props?.AMPHOE_T ?? props?.amphoe ?? '';
+  const name = props?.AMPHOE_T ?? props?.AMP_NAM_T ?? props?.amphoe ?? '';
   for (const [key, val] of Object.entries(DISTRICT_COLORS)) {
     if (name.includes(key.substring(0, 4))) return val;
   }
@@ -580,12 +684,8 @@ function getDistrictColor(props) {
 }
 
 async function loadGeoJSON() {
-  const paths = [
-    'Subdistric_KamPhaengPhet.json',
-    './Subdistric_KamPhaengPhet.json',
-  ];
   let geojson = null;
-  for (const p of paths) {
+  for (const p of ['Subdistric_KamPhaengPhet.json', './Subdistric_KamPhaengPhet.json']) {
     try {
       const r = await fetch(p);
       if (r.ok) { geojson = await r.json(); break; }
@@ -596,12 +696,13 @@ async function loadGeoJSON() {
   geojsonLayer = L.geoJSON(geojson, {
     style(feat) {
       const c = getDistrictColor(feat.properties);
-      return { fillColor: c.fill, fillOpacity: 0.35, color: c.stroke, weight: 1.5, opacity: 0.9 };
+      // Semi-transparent fill so weather animation shows through; white stroke for visibility
+      return { fillColor: c.fill, fillOpacity: 0.25, color: '#ffffff', weight: 2.5, opacity: 0.9 };
     },
     onEachFeature(feat, layer) {
       const p = feat.properties;
-      const tambon  = p?.TAM_NAM_T ?? p?.tambon  ?? p?.name   ?? 'ตำบล';
-      const amphoe  = p?.AMP_NAM_T ?? p?.amphoe  ?? p?.DISTRICT ?? '';
+      const tambon = p?.TAMBON_T ?? p?.TAM_NAM_T ?? p?.tambon ?? p?.name   ?? 'ตำบล';
+      const amphoe = p?.AMPHOE_T ?? p?.AMP_NAM_T ?? p?.amphoe ?? p?.DISTRICT ?? '';
 
       layer.bindPopup(`
         <div class="popup-title">ต.${tambon}</div>
@@ -612,17 +713,12 @@ async function loadGeoJSON() {
       `);
 
       layer.on({
-        mouseover(e) {
-          e.target.setStyle({ fillOpacity: 0.65, weight: 2.5 });
-          e.target.bringToFront();
-        },
-        mouseout(e) {
-          if (selectedLayer !== e.target) geojsonLayer.resetStyle(e.target);
-        },
+        mouseover(e) { e.target.setStyle({ fillOpacity: 0.55, weight: 3 }); e.target.bringToFront(); },
+        mouseout(e)  { if (selectedLayer !== e.target) geojsonLayer.resetStyle(e.target); },
         click(e) {
           if (selectedLayer && selectedLayer !== e.target) geojsonLayer.resetStyle(selectedLayer);
           selectedLayer = e.target;
-          e.target.setStyle({ fillOpacity: 0.75, weight: 3, color: '#fff' });
+          e.target.setStyle({ fillOpacity: 0.65, weight: 3.5, color: '#ffe066' });
           selectTambon(tambon, amphoe);
           map.fitBounds(e.target.getBounds(), { padding: [20, 20] });
         },
@@ -652,22 +748,23 @@ function addStationMarkers() {
     const lon = s.lon ?? s.longitude ?? s.lng;
     if (!lat || !lon) return;
 
+    const isOnline = s.online !== false;
+    const dotColor = isOnline ? '#86efac' : '#e53e3e';
+
     const icon = L.divIcon({
-      html: `<div style="background:#1e3a5c;border:2px solid #a8d0f0;border-radius:50%;width:14px;height:14px;box-shadow:0 2px 8px rgba(0,0,0,0.4);cursor:pointer;"></div>`,
+      html: `<div style="background:#1e3a5c;border:2px solid ${dotColor};border-radius:50%;width:14px;height:14px;box-shadow:0 2px 8px rgba(0,0,0,0.5);cursor:pointer;"></div>`,
       className: '', iconSize: [14,14], iconAnchor: [7,7],
     });
 
     L.marker([lat, lon], { icon, zIndexOffset: 1000 })
       .bindTooltip(s.station_name ?? s.name ?? 'สถานี', { direction:'top', offset:[0,-10], opacity:0.95 })
       .on('click', () => {
-        // หาสถานีนี้ใน activeStations
         const idx = activeStations.findIndex(st => (st.station_code ?? st.id) === (s.station_code ?? s.id));
         if (idx >= 0) {
           currentIdx = idx;
           document.getElementById('station-select').value = idx;
           loadStationWeather(activeStations[idx]);
         } else {
-          // reset filter และโชว์สถานีนี้
           setActiveStations(allStations, i);
         }
       })
@@ -677,11 +774,10 @@ function addStationMarkers() {
 
 // ─── SELECT TAMBON ────────────────────────────────────────────────────────────
 function selectTambon(tambonName, districtName) {
-  const c = DISTRICT_COLORS[districtName] ?? { fill: '#4682B4', stroke: '#2c5f8a' };
-
-  // กรองสถานีใกล้ตำบล/อำเภอ
+  const c  = DISTRICT_COLORS[districtName] ?? { fill: '#4682B4', stroke: '#2c5f8a' };
   const tn = tambonName.toLowerCase();
   const dn = districtName.toLowerCase().substring(0, 4);
+
   let matches = allStations.filter(s => {
     const n = ((s.station_name ?? '') + ' ' + (s.name_eng ?? '')).toLowerCase();
     return n.includes(tn) || n.includes(dn);
@@ -690,7 +786,6 @@ function selectTambon(tambonName, districtName) {
 
   setActiveStations(matches, 0);
 
-  // อัปเดต tambon info
   document.getElementById('tambon-info').innerHTML = `
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
       <div class="tambon-color-dot" style="background:${c.fill}"></div>
@@ -726,7 +821,24 @@ document.getElementById('station-select').addEventListener('change', e => {
 
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 async function init() {
-  initMap();
+  // Windy API initialises into #windy and exposes its Leaflet map
+  await new Promise(resolve => {
+    windyInit({
+      key: WINDY_KEY,
+      lat: 16.3,
+      lon: 99.5,
+      zoom: 9,
+      overlay: 'wind',     // default weather layer
+      level:   'surface',
+      product: 'ecmwf',
+    }, windyAPI => {
+      map        = windyAPI.map;
+      windyStore = windyAPI.store;
+      resolve();
+    });
+  });
+
+  setupControls();
   setNoStation();
   loadGeoJSON();
 
@@ -745,14 +857,13 @@ async function init() {
       `<div class="update-dot" style="background:#a0aec0"></div><span>ไม่สามารถเชื่อมต่อ API</span>`;
   }
 
-  // Auto-refresh ทุก 5 นาที — re-fetch ทั้งหมดเพื่ออัปเดต online/latest_data
+  // Auto-refresh every 5 minutes
   setInterval(async () => {
     const fresh = await fetchStations();
     if (fresh?.length) {
-      // อัปเดต allStations ด้วยข้อมูลใหม่ (รักษา online status)
       allStations = fresh;
-      const activeCodes = new Set(activeStations.map(s => s.station_code ?? s.id));
-      const freshActive = fresh.filter(s => activeCodes.has(s.station_code ?? s.id));
+      const activeCodes  = new Set(activeStations.map(s => s.station_code ?? s.id));
+      const freshActive  = fresh.filter(s => activeCodes.has(s.station_code ?? s.id));
       activeStations = freshActive.length ? freshActive : fresh;
       populateSelector(activeStations);
       document.getElementById('station-select').value = currentIdx;
