@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>iTambon | ข้อมูลตำบล จ.กำแพงเพชร</title>
+<title>iTambon</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Kanit:wght@400;600;700&display=swap" rel="stylesheet"/>
@@ -286,81 +286,112 @@
 
   /* ─── MAIN HERO ─── */
   .site-header {
-    background: linear-gradient(135deg, #0f2540 0%, #1e4976 40%, #2c5f8a 75%, #4682B4 100%);
+    background: linear-gradient(135deg, #0b1e35 0%, #0f2d50 30%, #1a4976 60%, #2c6a9a 100%);
     color: #fff;
-    padding: 32px 24px 28px;
-    border-bottom: 3px solid rgba(168,208,240,0.4);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 60px 48px;
     position: relative;
     overflow: hidden;
+    border-bottom: 1px solid rgba(168,208,240,0.2);
   }
-  .site-header::after {
+  /* radial light blooms */
+  .site-header::before {
     content: '';
     position: absolute;
     inset: 0;
-    background: radial-gradient(ellipse at 80% 50%, rgba(100,180,255,0.08) 0%, transparent 65%);
+    background:
+      radial-gradient(ellipse at 8% 75%, rgba(30,100,200,0.3) 0%, transparent 45%),
+      radial-gradient(ellipse at 55% 20%, rgba(80,160,255,0.08) 0%, transparent 40%);
     pointer-events: none;
+    z-index: 0;
+  }
+  /* bg image — right side, 3x, 75% opacity, fades left */
+  .hero-bg {
+    position: absolute;
+    right: -8%;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 62%;
+    aspect-ratio: 1;
+    background: url('bg_itambon.png') center / contain no-repeat;
+    opacity: 0.75;
+    mix-blend-mode: screen;
+    -webkit-mask-image: linear-gradient(to right, transparent 0%, rgba(0,0,0,0.5) 22%, black 50%);
+    mask-image:         linear-gradient(to right, transparent 0%, rgba(0,0,0,0.5) 22%, black 50%);
+    pointer-events: none;
+    z-index: 0;
   }
   .site-header-inner {
     max-width: 1400px;
     margin: 0 auto;
+    width: 100%;
     display: flex;
     align-items: center;
-    gap: 20px;
+    gap: 40px;
     flex-wrap: wrap;
     position: relative;
     z-index: 1;
   }
-  .site-header-logo {
-    font-size: 3rem;
-    flex-shrink: 0;
-    line-height: 1;
-    filter: drop-shadow(0 2px 8px rgba(0,0,0,0.3));
-  }
-  .site-header-text { flex: 1; min-width: 220px; }
+  .site-header-text { flex: 1; min-width: 280px; max-width: 700px; }
   .site-eyebrow {
-    font-size: 0.7rem;
-    letter-spacing: 2px;
+    font-size: 0.68rem;
+    letter-spacing: 3px;
     text-transform: uppercase;
-    opacity: 0.6;
-    margin: 0 0 4px 0;
+    opacity: 0.45;
+    margin: 0 0 16px 0;
     font-family: 'Kanit', sans-serif;
+  }
+  .hero-title-row {
+    display: flex;
+    align-items: center;
+    gap: 22px;
+    margin-bottom: 20px;
+  }
+  .hero-logo {
+    height: 96px;
+    width: auto;
+    flex-shrink: 0;
+    filter: drop-shadow(0 6px 24px rgba(0,0,0,0.45)) brightness(1.08);
   }
   .site-title {
     font-family: 'Kanit', sans-serif;
-    font-size: 1.75rem;
+    font-size: 3.5rem;
     font-weight: 700;
     margin: 0;
-    line-height: 1.15;
+    line-height: 1.0;
+    letter-spacing: -0.5px;
   }
-  .site-title span { color: #7ec8f0; }
+  .site-title span { color: #6ec6f5; }
   .site-desc {
-    font-size: 0.81rem;
-    opacity: 0.85;
-    margin: 6px 0 0 0;
-    line-height: 1.6;
+    font-size: 1.05rem;
+    opacity: 0.88;
+    margin: 0 0 8px 0;
+    line-height: 1.75;
   }
   .site-desc-sub {
-    font-size: 0.74rem;
-    opacity: 0.58;
-    margin: 5px 0 0 0;
-    line-height: 1.5;
+    font-size: 0.8rem;
+    opacity: 0.5;
+    margin: 0;
+    line-height: 1.65;
   }
   .site-header-badges {
     display: flex;
-    gap: 8px;
+    gap: 10px;
     flex-wrap: wrap;
-    align-items: center;
-    align-self: flex-start;
-    padding-top: 4px;
+    margin-top: 28px;
   }
   .header-badge {
-    background: rgba(255,255,255,0.12);
-    border: 1px solid rgba(255,255,255,0.22);
-    border-radius: 20px;
-    padding: 5px 13px;
-    font-size: 0.73rem;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 24px;
+    padding: 6px 16px;
+    font-size: 0.75rem;
     white-space: nowrap;
-    backdrop-filter: blur(4px);
+    backdrop-filter: blur(6px);
+    letter-spacing: 0.3px;
   }
 
   /* Station code inline (before name) */
@@ -389,12 +420,16 @@
 <body>
 
 <header class="site-header">
+  <div class="hero-bg"></div>
   <div class="site-header-inner">
     <div class="site-header-text">
       <p class="site-eyebrow">iWASAM · Intelligent Water Allocation Scheduling And Monitoring</p>
-      <h1 class="site-title">iTambon <span>กำแพงเพชร</span></h1>
-      <p class="site-desc">ระบบข้อมูลตรวจวัดสภาพอากาศรายตำบล ลุ่มน้ำคลองสวนหมาก จ.กำแพงเพชร<br>พัฒนาโดย คณะวิศวกรรมศาสตร์ กำแพงแสน มหาวิทยาลัยเกษตรศาสตร์</p>
-      <p class="site-desc-sub">ครอบคลุมพื้นที่ลุ่มน้ำกว่า 1,213 ตร.กม. · วัดอุณหภูมิ ความชื้น ฝน รังสีอาทิตย์ ความเร็วลม และฝุ่น PM 2.5 · คลิกที่ตำบลบนแผนที่เพื่อดูข้อมูล</p>
+      <div class="hero-title-row">
+        <img src="iwasam_png.png" class="hero-logo" alt="iWASAM">
+        <h1 class="site-title">iTambon <span>กำแพงเพชร</span></h1>
+      </div>
+      <p class="site-desc">แพลตฟอร์มข้อมูลรายตำบลในจังหวัดกำแพงเพชร<br>พัฒนาโดย คณะวิศวกรรมศาสตร์ กำแพงแสน มหาวิทยาลัยเกษตรศาสตร์</p>
+      <p class="site-desc-sub">ที่พัฒนาขึ้นเพื่อเสริมศักยภาพของ iWASAM ในการให้บริการข้อมูลข่าวสารที่เป็นประโยชน์ในการบริหารจัดการทรัพยากรน้ำ ที่ดินและการเกษตรในระดับตำบลแก่เกษตรกร เจ้าหน้าที่ และองค์กร และระหว่างเกษตรกร-เจ้าหน้าที่-นักวิจัย</p>
     </div>
   </div>
 </header>
@@ -599,7 +634,9 @@ function fv(v, dec = 1) {
   return parseFloat(v).toFixed(dec);
 }
 
-function renderCards(d) {
+const NO_PM25_STATIONS = new Set(['RID-KU001','RID-KU002','RID-KU003','RID-KU004']);
+
+function renderCards(d, stationCode) {
   if (!d) return `<div class="error-state">ไม่พบข้อมูลสถานีนี้</div>`;
   const temp  = d.temp  ?? d.temperature ?? d.air_temp ?? null;
   const rh    = d.rh    ?? d.humidity    ?? d.relative_humidity ?? null;
@@ -608,7 +645,8 @@ function renderCards(d) {
   const rain  = d.rain  ?? d.rainfall   ?? d.precipitation ?? null;
   const pm25  = d.PM25  ?? d.pm25       ?? d.pm2_5 ?? null;
   const pm    = pm25Class(pm25);
-  const isDemo = d._demo;
+  const isDemo  = d._demo;
+  const showPM  = !NO_PM25_STATIONS.has(stationCode);
 
   return `
   <div class="weather-grid">
@@ -637,13 +675,14 @@ function renderCards(d) {
       <div class="wc-value">${fv(rain)}<span class="wc-unit">mm</span></div>
       <div class="wc-label">ฝน (สะสม)</div>
     </div>
+    ${showPM ? `
     <div class="weather-card pm25">
       <div class="wc-icon">🫁</div>
       <div class="wc-value">${fv(pm25)}<span class="wc-unit">μg/m³</span></div>
       <div class="wc-label">PM 2.5</div>
       ${pm25 != null && pm.cls ? `<div class="pm25-badge ${pm.cls}">${pm.label}</div>` : ''}
       ${isDemo ? '<div class="pm25-badge" style="background:#fed7d7;color:#c53030;margin-top:4px">ข้อมูลตัวอย่าง</div>' : ''}
-    </div>
+    </div>` : ''}
   </div>`;
 }
 
@@ -667,7 +706,7 @@ async function loadStationWeather(station) {
     data = await fetchLatestWeather(code);
   }
 
-  document.getElementById('weather-content').innerHTML = renderCards(data);
+  document.getElementById('weather-content').innerHTML = renderCards(data, code);
 
   const ts = data?.datetime ?? data?.timestamp ?? data?.created_at;
   const timeEl = document.getElementById('update-time');
